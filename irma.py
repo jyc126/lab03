@@ -1,5 +1,6 @@
 import turtle
 import csv
+import time
 
 def irma_setup():
     """Creates the Turtle and the Screen with the map background
@@ -18,7 +19,7 @@ def irma_setup():
     # kludge to get the map shown as a background image,
     # since wn.bgpic does not allow you to position the image
     canvas = wn.getcanvas()
-    
+
     turtle.setworldcoordinates(-90, 0, -17.66, 45)  # set the coordinate system to match lat/long
 
     map_bg_img = tkinter.PhotoImage(file="images/atlantic-basin.gif")
@@ -27,14 +28,53 @@ def irma_setup():
     # when setworldcoordinates is used
     canvas.create_image(-1175, -580, anchor=tkinter.NW, image=map_bg_img)
 
-    
+
     t = turtle.Turtle()
     wn.register_shape("images/hurricane.gif")
     t.shape("images/hurricane.gif")
 
     return (t, wn, map_bg_img)
 
-        
+
+def setCategory(speed, t):
+    ''' Determine the category rating of the hurricane, given
+        the wind speed in MPH.  Modify the pen settings of the
+        turtle t to be appropriate for drawing that category.
+        Return the category, or 0 for non-hurricane strength wind'''
+
+
+    """ all the categorys of hurricanes and their respective wind speeds """
+    category1 = 74
+    category2 = 96
+    category3 = 111
+    category4 = 130
+    category5 = 157
+
+    if speed < category1:
+        t.width(1)
+        t.pencolor('white')
+        return 0
+    elif speed < category2:
+        t.width(2)
+        t.pencolor('blue')
+        return 1
+    elif speed < category3:
+        t.width(4)
+        t.pencolor('green')
+        return 2
+    elif speed < category4:
+        t.width(6)
+        t.pencolor('yellow')
+        return 3
+    elif speed < category5:
+        t.width(8)
+        t.pencolor('orange')
+        return 4
+    else:
+        t.width(10)
+        t.pencolor('red')
+        return 5
+
 
 def irma():
     """Animates the path of hurricane Irma
@@ -50,6 +90,9 @@ def irma():
         # This line gives you an "iterator" you can use to get each line
         # in the file.
         pointreader = csv.reader(csvfile)
+        next(pointreader)
+        t.width()
+        t.penup()
 
         # You'll need to add some code here, before the loop
         # One thing you'll need to figure out how to do is to
@@ -66,6 +109,14 @@ def irma():
             # row in the file.
             # Make sure you understand what is happening here.
             # Then, you'll need to change this code
+            lat = float(row[2])
+            lon = float(row[3])
+            wind = float(row[4])
+            t.setpos(lon, lat)
+            t.pendown()
+            cat = setCategory(wind, t)
+            if cat >= 1:
+                t.write(str(cat), font=("Arial", 10, "normal"))
             print("Date:", row[0], "Time:", row[1])
 
 
@@ -80,3 +131,4 @@ def irma():
 
 if __name__ == "__main__":
     bg=irma()
+    time.sleep(10)
